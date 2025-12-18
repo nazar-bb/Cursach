@@ -1,0 +1,183 @@
+version: '3.8'
+
+services:
+  postgres_master:
+    image: postgres:14
+    shm_size: 256mb
+    container_name: cursach4_master
+    ports:
+      - "54324:5432"
+    environment:
+      POSTGRES_USER: nazar
+      POSTGRES_PASSWORD: pw123321
+      POSTGRES_DB: cursach_db
+    volumes:
+      - ./db_creat/db_createE1E3E4.sql:/docker-entrypoint-initdb.d/10-dbstruct.sql
+      - ./dataset:/data_to_import
+      - postgres_master_data:/var/lib/postgresql/data
+    command: >
+      postgres -c wal_level=replica
+               -c max_wal_senders=10
+               -c wal_keep_size=64
+               -c listen_addresses='*'
+               -c log_statement=all
+               -c log_duration=on
+               -c log_min_duration_statement=0
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+
+  postgres_replica_1:
+    image: postgres:14
+    shm_size: 256mb
+    container_name: cursach4_replica_1
+    ports:
+      - "54325:5432"
+    environment:
+      POSTGRES_USER: nazar
+      POSTGRES_PASSWORD: pw123321
+      POSTGRES_DB: cursach_db
+    volumes:
+      - cursach4_replica_data_1:/var/lib/postgresql/data
+      - ./dataset:/data_to_import
+    depends_on:
+      - postgres_master
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        if [ ! -s /var/lib/postgresql/data/PG_VERSION ]; then
+          export PGPASSWORD=pw123321
+          pg_basebackup -h postgres_master -D /var/lib/postgresql/data -U nazar -P -v --wal-method=stream
+          touch /var/lib/postgresql/data/standby.signal
+        fi
+        
+        chown -R postgres:postgres /var/lib/postgresql/data
+        chmod 0700 /var/lib/postgresql/data
+
+        exec gosu postgres postgres -c primary_conninfo="host=postgres_master port=5432 user=nazar password=pw123321 application_name=replica_1" \
+               -c log_statement=all \
+               -c log_duration=on \
+               -c log_min_duration_statement=0
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+
+  postgres_replica_2:
+    image: postgres:14
+    shm_size: 256mb
+    container_name: cursach4_replica_2
+    ports:
+      - "54326:5432"
+    environment:
+      POSTGRES_USER: nazar
+      POSTGRES_PASSWORD: pw123321
+      POSTGRES_DB: cursach_db
+    volumes:
+      - cursach4_replica_data_2:/var/lib/postgresql/data
+      - ./dataset:/data_to_import
+    depends_on:
+      - postgres_master
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        if [ ! -s /var/lib/postgresql/data/PG_VERSION ]; then
+          export PGPASSWORD=pw123321
+          pg_basebackup -h postgres_master -D /var/lib/postgresql/data -U nazar -P -v --wal-method=stream
+          touch /var/lib/postgresql/data/standby.signal
+        fi
+        chown -R postgres:postgres /var/lib/postgresql/data
+        chmod 0700 /var/lib/postgresql/data
+        exec gosu postgres postgres -c primary_conninfo="host=postgres_master port=5432 user=nazar password=pw123321 application_name=replica_2" \
+               -c log_statement=all \
+               -c log_duration=on \
+               -c log_min_duration_statement=0
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+
+  postgres_replica_3:
+    image: postgres:14
+    shm_size: 256mb
+    container_name: cursach4_replica_3
+    ports:
+      - "54327:5432"
+    environment:
+      POSTGRES_USER: nazar
+      POSTGRES_PASSWORD: pw123321
+      POSTGRES_DB: cursach_db
+    volumes:
+      - cursach4_replica_data_3:/var/lib/postgresql/data
+      - ./dataset:/data_to_import
+    depends_on:
+      - postgres_master
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        if [ ! -s /var/lib/postgresql/data/PG_VERSION ]; then
+          export PGPASSWORD=pw123321
+          pg_basebackup -h postgres_master -D /var/lib/postgresql/data -U nazar -P -v --wal-method=stream
+          touch /var/lib/postgresql/data/standby.signal
+        fi
+        chown -R postgres:postgres /var/lib/postgresql/data
+        chmod 0700 /var/lib/postgresql/data
+        exec gosu postgres postgres -c primary_conninfo="host=postgres_master port=5432 user=nazar password=pw123321 application_name=replica_3" \
+               -c log_statement=all \
+               -c log_duration=on \
+               -c log_min_duration_statement=0
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+
+  postgres_replica_4:
+    image: postgres:14
+    shm_size: 256mb
+    container_name: cursach4_replica_4
+    ports:
+      - "54328:5432"
+    environment:
+      POSTGRES_USER: nazar
+      POSTGRES_PASSWORD: pw123321
+      POSTGRES_DB: cursach_db
+    volumes:
+      - cursach4_replica_data_4:/var/lib/postgresql/data
+      - ./dataset:/data_to_import
+    depends_on:
+      - postgres_master
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        if [ ! -s /var/lib/postgresql/data/PG_VERSION ]; then
+          export PGPASSWORD=pw123321
+          pg_basebackup -h postgres_master -D /var/lib/postgresql/data -U nazar -P -v --wal-method=stream
+          touch /var/lib/postgresql/data/standby.signal
+        fi
+        chown -R postgres:postgres /var/lib/postgresql/data
+        chmod 0700 /var/lib/postgresql/data
+        exec gosu postgres postgres -c primary_conninfo="host=postgres_master port=5432 user=nazar password=pw123321 application_name=replica_4" \
+               -c log_statement=all \
+               -c log_duration=on \
+               -c log_min_duration_statement=0
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+
+volumes:
+  postgres_master_data:
+  cursach4_replica_data_1:
+  cursach4_replica_data_2:
+  cursach4_replica_data_3:
+  cursach4_replica_data_4:

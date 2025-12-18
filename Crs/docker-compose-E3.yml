@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  redis_cache:
+    image: redis:latest
+    shm_size: 256mb
+    container_name: redis_cache
+    ports:
+      - "6379:6379"
+
+  postgres_cache:
+    image: postgres:14
+    shm_size: 256mb
+    container_name: cursach3
+    ports:
+      - "54323:5432"
+    
+    environment:
+      POSTGRES_USER: nazar
+      POSTGRES_PASSWORD: pw123321!
+      POSTGRES_DB: cursach_db
+
+    volumes:
+      - ./db_creat/db_createE1E3E4.sql:/docker-entrypoint-initdb.d/10-dbstruct.sql
+      - ./dataset:/data_to_import
+      
+      - postgres_data_e3:/var/lib/postgresql/data
+    command: >
+      postgres 
+      -c log_statement=all
+      -c log_duration=on
+      -c log_min_duration_statement=0
+      
+    deploy:
+      resources:
+        limits:
+          memory: 3G
+          cpus: '3'
+    
+    depends_on:
+      - redis_cache
+
+volumes:
+  postgres_data_e3:
+    driver: local

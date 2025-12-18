@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  postgres_e2:
+    image: postgres:14
+    shm_size: 256mb
+    container_name: cursach2
+    ports:
+      - "54322:5432"
+    environment:
+      POSTGRES_USER: nazar
+      POSTGRES_PASSWORD: pw123321!
+      POSTGRES_DB: cursach_db
+    volumes:
+      - cursach2_old_data:/var/lib/postgresql/data
+      - ./db_creat/db_createE2.sql:/docker-entrypoint-initdb.d/10-dbstruct.sql
+      - ./dataset:/data_to_import
+       
+    command: >
+      postgres 
+      -c log_statement=all
+      -c log_duration=on
+      -c log_min_duration_statement=0
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '3'
+
+volumes:
+  cursach2_old_data:
+    name: 330c4615f69c737fb6ae247c2f6ee84e97fcca486aa9e20ea29878442e23c41c
+    external: true
